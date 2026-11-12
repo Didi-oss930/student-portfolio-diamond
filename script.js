@@ -1,30 +1,58 @@
 ﻿document.addEventListener("DOMContentLoaded", () => {
-    // --- 1. Single-Page Navigation Switching ---
     const navLinks = document.querySelectorAll(".nav-links a");
+    const actionButtons = document.querySelectorAll(".hero-buttons a, a[href^='#']");
     const sections = document.querySelectorAll(".page-section");
     const hamburger = document.getElementById("hamburger");
     const navMenu = document.getElementById("navLinks");
+
+    function switchSection(targetId, updateHistory = true) {
+        navLinks.forEach(l => {
+            if (l.getAttribute("href") === `#${targetId}`) {
+                l.classList.add("active");
+            } else {
+                l.classList.remove("active");
+            }
+        });
+
+        sections.forEach(sec => {
+            sec.classList.remove("active-section");
+            if (sec.id === targetId) {
+                sec.classList.add("active-section");
+            }
+        });
+
+        navMenu.classList.remove("show");
+
+        if (updateHistory) {
+            history.pushState(null, null, `#${targetId}`);
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Check URL hash on page load so reloading stays on the current page/section
+    const initialHash = window.location.hash.substring(1);
+    if (initialHash && document.getElementById(initialHash)) {
+        switchSection(initialHash, false);
+    } else {
+        switchSection("home", false);
+    }
 
     navLinks.forEach(link => {
         link.addEventListener("click", (e) => {
             e.preventDefault();
             const targetId = link.getAttribute("href").substring(1);
+            switchSection(targetId, true);
+        });
+    });
 
-            // Update active states for links
-            navLinks.forEach(l => l.classList.remove("active"));
-            link.classList.add("active");
-
-            // Update active states for sections
-            sections.forEach(sec => {
-                sec.classList.remove("active-section");
-                if (sec.id === targetId) {
-                    sec.classList.add("active-section");
-                }
-            });
-
-            // Close mobile menu if open
-            navMenu.classList.remove("show");
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+    actionButtons.forEach(btn => {
+        btn.addEventListener("click", (e) => {
+            const href = btn.getAttribute("href");
+            if (href && href.startsWith("#")) {
+                e.preventDefault();
+                const targetId = href.substring(1);
+                switchSection(targetId, true);
+            }
         });
     });
 
@@ -32,22 +60,7 @@
         navMenu.classList.toggle("show");
     });
 
-    // --- 2. Theme Switcher (Dark / Light Mode) ---
-    const themeToggleBtn = document.getElementById("themeToggle");
-    const htmlElement = document.documentElement;
-
-    themeToggleBtn.addEventListener("click", () => {
-        const currentTheme = htmlElement.getAttribute("data-theme");
-        if (currentTheme === "dark") {
-            htmlElement.setAttribute("data-theme", "light");
-            themeToggleBtn.innerHTML = '<i class="fa-solid fa-sun"></i>';
-        } else {
-            htmlElement.setAttribute("data-theme", "dark");
-            themeToggleBtn.innerHTML = '<i class="fa-solid fa-moon"></i>';
-        }
-    });
-
-    // --- 3. Academic Planner Functionality ---
+    // --- Academic Planner Functionality ---
     const taskInput = document.getElementById("taskInput");
     const taskPriority = document.getElementById("taskPriority");
     const addTaskBtn = document.getElementById("addTaskBtn");
@@ -56,13 +69,13 @@
     const completedTasksSpan = document.getElementById("completedTasks");
     const filterBtns = document.querySelectorAll(".filter-btn");
 
-    let tasks = JSON.parse(localStorage.getItem("academic_tasks")) || [
-        { id: 1, text: "Complete Cloud Computing assignment", priority: "High", completed: false },
-        { id: 2, text: "Review Cisco networking routing protocols", priority: "Normal", completed: true }
+    let tasks = JSON.parse(localStorage.getItem("diamond_academic_tasks")) || [
+        { id: 1, text: "Review Cisco Cybersecurity module chapters", priority: "High", completed: false },
+        { id: 2, text: "Complete network security policy draft", priority: "Normal", completed: true }
     ];
 
     function saveAndRenderTasks() {
-        localStorage.setItem("academic_tasks", JSON.stringify(tasks));
+        localStorage.setItem("diamond_academic_tasks", JSON.stringify(tasks));
         renderTasks();
     }
 
@@ -138,7 +151,7 @@
 
     renderTasks();
 
-    // --- 4. Contact Form Validation ---
+    // --- Contact Form Validation ---
     const contactForm = document.getElementById("contactForm");
     const nameInput = document.getElementById("name");
     const emailInput = document.getElementById("email");
@@ -150,19 +163,16 @@
         e.preventDefault();
         let isValid = true;
 
-        // Reset errors & success message
         document.querySelectorAll(".error-msg").forEach(el => el.textContent = "");
         document.querySelectorAll("input, textarea").forEach(el => el.classList.remove("invalid"));
         formSuccess.textContent = "";
 
-        // Validate Name (No field is empty)
         if (nameInput.value.trim() === "") {
             document.getElementById("nameError").textContent = "Name field cannot be empty.";
             nameInput.classList.add("invalid");
             isValid = false;
         }
 
-        // Validate Email (Format check)
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(emailInput.value.trim())) {
             document.getElementById("emailError").textContent = "Please enter a valid email address.";
@@ -170,7 +180,6 @@
             isValid = false;
         }
 
-        // Validate Phone (Digits only check)
         const phoneRegex = /^\d+$/;
         if (!phoneRegex.test(phoneInput.value.trim()) || phoneInput.value.trim() === "") {
             document.getElementById("phoneError").textContent = "Phone number must contain digits only.";
@@ -178,7 +187,6 @@
             isValid = false;
         }
 
-        // Validate Message (No field is empty)
         if (messageInput.value.trim() === "") {
             document.getElementById("messageError").textContent = "Message field cannot be empty.";
             messageInput.classList.add("invalid");
