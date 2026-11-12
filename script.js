@@ -1,6 +1,5 @@
 ﻿document.addEventListener("DOMContentLoaded", () => {
     const navLinks = document.querySelectorAll(".nav-links a");
-    const actionButtons = document.querySelectorAll(".hero-buttons a, a[href^='#']");
     const sections = document.querySelectorAll(".page-section");
     const hamburger = document.getElementById("hamburger");
     const navMenu = document.getElementById("navLinks");
@@ -29,7 +28,7 @@
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // Check URL hash on page load so reloading stays on the current page/section
+    // Check URL hash on page load so reloading stays on the current section
     const initialHash = window.location.hash.substring(1);
     if (initialHash && document.getElementById(initialHash)) {
         switchSection(initialHash, false);
@@ -45,16 +44,23 @@
         });
     });
 
-    actionButtons.forEach(btn => {
-        btn.addEventListener("click", (e) => {
-            const href = btn.getAttribute("href");
-            if (href && href.startsWith("#")) {
-                e.preventDefault();
-                const targetId = href.substring(1);
-                switchSection(targetId, true);
-            }
+    // Explicit Listeners for Hero Action Buttons
+    const viewProjectsBtn = document.querySelector('.primary-btn[href="#projects"]');
+    const getInTouchBtn = document.querySelector('.secondary-btn[href="#contact"]');
+
+    if (viewProjectsBtn) {
+        viewProjectsBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            switchSection("projects", true);
         });
-    });
+    }
+
+    if (getInTouchBtn) {
+        getInTouchBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            switchSection("contact", true);
+        });
+    }
 
     hamburger.addEventListener("click", () => {
         navMenu.classList.toggle("show");
@@ -200,3 +206,7 @@
     });
 });
 
+
+
+
+        
